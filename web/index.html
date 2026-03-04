@@ -3,44 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>瞎掰王 9UPPER MVP</title>
+  <title>瞎掰王 9UPPER MVP（房间版）</title>
   <style>
     body{font-family:Arial,"PingFang SC",sans-serif;max-width:900px;margin:20px auto;padding:0 12px}
     .card{border:1px solid #ddd;border-radius:10px;padding:14px;margin:10px 0}
     input,button,select{padding:8px;margin:4px 0}
     .hidden{display:none}
+    .mono{font-family:ui-monospace,Consolas,monospace}
   </style>
 </head>
 <body>
-  <h2>瞎掰王（9UPPER）MVP</h2>
+  <h2>瞎掰王（9UPPER）MVP - 房间版</h2>
 
-  <div class="card" id="setupBox">
-    <div>玩家（逗号分隔，3-9人）</div>
-    <input id="players" style="width:100%" value="小明,小红,小刚,小李" />
+  <div class="card" id="entryBox">
+    <h3>1) 创建房间</h3>
+    <div>参与人数：
+      <select id="roomSize">
+        <option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </div>
     <div>局数：
       <select id="maxRounds"><option value="2" selected>2</option><option value="3">3</option></select>
     </div>
-    <button onclick="startGame()">开始游戏</button>
+    <button onclick="createRoom()">创建房间</button>
+    <hr/>
+    <h3>2) 加入房间</h3>
+    <input id="joinCode" placeholder="房间号（4位）" />
+    <input id="joinName" placeholder="你的名字" />
+    <button onclick="joinRoom()">加入</button>
+  </div>
+
+  <div class="card hidden" id="roomBox">
+    <div>房间号：<b class="mono" id="roomCode"></b></div>
+    <div>目标人数：<b id="targetSize"></b>，当前：<b id="currentSize"></b></div>
+    <div>玩家：<span id="playersList"></span></div>
+    <div id="startHint">等待人齐自动开始…</div>
   </div>
 
   <div id="game" class="hidden">
     <div class="card">
       <div><b>第 <span id="roundNo"></span> / <span id="roundMax"></span> 轮</b></div>
       <div>词条：<b id="term"></b></div>
-      <div style="margin-top:8px">公开身份：大聪明 = <b id="smartName"></b></div>
+      <div>公开身份：大聪明 = <b id="smartName"></b></div>
     </div>
 
     <div class="card">
-      <h3>个人查看（每人看自己手机）</h3>
-      <div>每位玩家点击自己的名字查看本轮私密信息：</div>
-      <div id="peekBtns"></div>
-      <div id="peekResult" style="margin-top:8px"></div>
+      <h3>你的身份信息（每人看自己手机）</h3>
+      <div id="myInfo"></div>
     </div>
 
     <div class="card">
       <h3>发言阶段</h3>
-      <div>所有人依次发言解释词义：老实人说真实定义，瞎掰王自由发挥。</div>
-      <button onclick="goVote()">进入投票阶段</button>
+      <div>所有人依次发言解释词义：老实人说真实定义，瞎掰王即兴编造。</div>
+      <button id="voteBtn" onclick="goVote()">进入投票阶段（仅大聪明操作）</button>
     </div>
 
     <div id="voteBox" class="card hidden">
@@ -66,17 +81,51 @@ const deck=[
   {term:'马太效应',truth:'强者愈强、弱者愈弱的累积效应'}
 ];
 
+let rooms={};
+let myRoomCode='';
+let myName='';
 let state={};
-function shuffle(a){return [...a].sort(()=>Math.random()-0.5)}
 
-function startGame(){
-  const players=document.getElementById('players').value.split(',').map(x=>x.trim()).filter(Boolean);
+function shuffle(a){return [...a].sort(()=>Math.random()-0.5)}
+function genCode(){return Math.floor(1000+Math.random()*9000).toString()}
+
+function createRoom(){
+  const size=parseInt(document.getElementById('roomSize').value,10);
   const maxRounds=parseInt(document.getElementById('maxRounds').value,10);
-  if(players.length<3 || players.length>9){alert('人数需为3-9人');return}
-  state={players,maxRounds,round:0,scores:Object.fromEntries(players.map(p=>[p,0]))};
-  document.getElementById('setupBox').classList.add('hidden');
-  document.getElementById('game').classList.remove('hidden');
-  nextRound();
+  let code=genCode(); while(rooms[code]) code=genCode();
+  rooms[code]={code,size,maxRounds,players:[],started:false,scores:{},round:0};
+  document.getElementById('joinCode').value=code;
+  alert('房间已创建，房间号：'+code+'\n请大家用同一房间号加入');
+  refreshRoomUI(code);
+}
+
+function joinRoom(){
+  const code=(document.getElementById('joinCode').value||'').trim();
+  const name=(document.getElementById('joinName').value||'').trim();
+  if(!rooms[code]) return alert('房间不存在，请先创建');
+  if(!name) return alert('请输入名字');
+  const room=rooms[code];
+  if(room.players.includes(name)) return alert('名字已存在，请换一个');
+  if(room.players.length>=room.size) return alert('房间已满');
+
+  room.players.push(name);
+  room.scores[name]=0;
+  myRoomCode=code; myName=name;
+  refreshRoomUI(code);
+
+  if(room.players.length===room.size && !room.started){
+    startRound(room);
+  }
+}
+
+function refreshRoomUI(code){
+  const room=rooms[code];
+  document.getElementById('roomBox').classList.remove('hidden');
+  document.getElementById('roomCode').innerText=room.code;
+  document.getElementById('targetSize').innerText=room.size;
+  document.getElementById('currentSize').innerText=room.players.length;
+  document.getElementById('playersList').innerText=room.players.join('、') || '-';
+  document.getElementById('startHint').innerText = room.players.length===room.size ? '人齐，已开局' : '等待人齐自动开始…';
 }
 
 function assignRoles(players){
@@ -84,45 +133,41 @@ function assignRoles(players){
   return {smart:s[0], honest:s[1], bluffers:s.slice(2)};
 }
 
-function nextRound(){
-  state.round += 1;
-  state.card = deck[Math.floor(Math.random()*deck.length)];
-  state.roles = assignRoles(state.players);
-  state.voted=false;
+function startRound(room){
+  room.started=true;
+  room.round += 1;
+  room.card = deck[Math.floor(Math.random()*deck.length)];
+  room.roles = assignRoles(room.players);
+  room.voted=false;
 
-  document.getElementById('roundNo').innerText=state.round;
-  document.getElementById('roundMax').innerText=state.maxRounds;
-  document.getElementById('term').innerText=state.card.term;
-  document.getElementById('smartName').innerText=state.roles.smart;
-  document.getElementById('smartName2').innerText=state.roles.smart;
+  state=room;
+  document.getElementById('entryBox').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+
+  document.getElementById('roundNo').innerText=room.round;
+  document.getElementById('roundMax').innerText=room.maxRounds;
+  document.getElementById('term').innerText=room.card.term;
+  document.getElementById('smartName').innerText=room.roles.smart;
+  document.getElementById('smartName2').innerText=room.roles.smart;
   document.getElementById('voteBox').classList.add('hidden');
-  document.getElementById('peekResult').innerHTML='';
   document.getElementById('nextBox').innerHTML='';
-  renderPeekBtns();
+
+  const isHonest = myName===room.roles.honest;
+  const role = myName===room.roles.smart ? '大聪明' : (isHonest ? '老实人' : '瞎掰王');
+  const msg = isHonest
+    ? `你是【${role}】。真实定义：${room.card.truth}`
+    : `你是【${role}】。你的定义区域是空白，请即兴瞎掰。`;
+  document.getElementById('myInfo').innerHTML=`<b>${myName||'未加入'}</b>：${msg}`;
+
+  const voteBtn=document.getElementById('voteBtn');
+  voteBtn.disabled = myName!==room.roles.smart;
+  voteBtn.innerText = myName===room.roles.smart ? '进入投票阶段（你是大聪明）' : '仅大聪明可发起投票';
+
   renderScore();
 }
 
-function renderPeekBtns(){
-  const el=document.getElementById('peekBtns');
-  el.innerHTML='';
-  state.players.forEach(p=>{
-    const b=document.createElement('button');
-    b.innerText=p;
-    b.onclick=()=>peekAs(p);
-    el.appendChild(b);
-  });
-}
-
-function peekAs(player){
-  const isHonest = player===state.roles.honest;
-  const role = player===state.roles.smart ? '大聪明' : (isHonest ? '老实人' : '瞎掰王');
-  const msg = isHonest
-    ? `你是【${role}】。真实定义：${state.card.truth}`
-    : `你是【${role}】。你的定义区域是空白，请即兴瞎掰。`;
-  document.getElementById('peekResult').innerHTML = `<b>${player}</b>：${msg}`;
-}
-
 function goVote(){
+  if(myName!==state.roles.smart) return alert('仅大聪明可操作投票');
   const box=document.getElementById('voteBox');
   box.classList.remove('hidden');
   const el=document.getElementById('voteOptions');
@@ -153,7 +198,7 @@ function finishVote(pick){
   renderScore();
 
   if(state.round<state.maxRounds){
-    document.getElementById('nextBox').innerHTML='<button onclick="nextRound()">下一轮</button>';
+    document.getElementById('nextBox').innerHTML='<button onclick="startRound(state)">下一轮</button>';
   }else{
     const rank=Object.entries(state.scores).sort((a,b)=>b[1]-a[1]);
     document.getElementById('nextBox').innerHTML=`<h3>游戏结束</h3><div>冠军：<b>${rank[0][0]}</b>（${rank[0][1]}分）</div><button onclick="location.reload()">重新开始</button>`;
@@ -161,7 +206,7 @@ function finishVote(pick){
 }
 
 function renderScore(){
-  const arr=Object.entries(state.scores).sort((a,b)=>b[1]-a[1]);
+  const arr=Object.entries(state.scores||{}).sort((a,b)=>b[1]-a[1]);
   document.getElementById('score').innerHTML=arr.map(([p,s])=>`${p}: ${s} 分`).join('<br>');
 }
 </script>
