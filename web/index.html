@@ -3,131 +3,157 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>瞎掰王 MVP</title>
+  <title>瞎掰王 9UPPER MVP</title>
   <style>
     body{font-family:Arial,"PingFang SC",sans-serif;max-width:900px;margin:20px auto;padding:0 12px}
     .card{border:1px solid #ddd;border-radius:10px;padding:14px;margin:10px 0}
-    input,button,textarea,select{padding:8px;margin:4px 0}
+    input,button,select{padding:8px;margin:4px 0}
     .hidden{display:none}
   </style>
 </head>
 <body>
-  <h2>瞎掰王（在线测试 MVP）</h2>
-  <div class="card">
-    <div>玩家（逗号分隔）</div>
-    <input id="players" style="width:100%" value="小明,小红,小刚" />
-    <div>
-      <label>模式：</label>
-      <select id="mode">
-        <option value="online">线上（每人提交伪答案）</option>
-        <option value="offline">线下（自由发言后直接票选）</option>
-      </select>
+  <h2>瞎掰王（9UPPER）MVP</h2>
+
+  <div class="card" id="setupBox">
+    <div>玩家（逗号分隔，3-9人）</div>
+    <input id="players" style="width:100%" value="小明,小红,小刚,小李" />
+    <div>局数：
+      <select id="maxRounds"><option value="2" selected>2</option><option value="3">3</option></select>
     </div>
     <button onclick="startGame()">开始游戏</button>
   </div>
 
   <div id="game" class="hidden">
     <div class="card">
-      <div><b>回合 <span id="round"></span></b></div>
-      <div id="question"></div>
+      <div><b>第 <span id="roundNo"></span> / <span id="roundMax"></span> 轮</b></div>
+      <div>词条：<b id="term"></b></div>
+      <div style="margin-top:8px">公开身份：大聪明 = <b id="smartName"></b></div>
+      <div>（其余玩家身份保密，先完成“闭眼环节”）</div>
+    </div>
 
-      <div id="onlineBox">
-        <div style="margin-top:8px">当前提交玩家：<b id="currentPlayer"></b></div>
-        <textarea id="fakeAnswer" rows="3" style="width:100%" placeholder="输入你认为能骗到别人的答案"></textarea>
-        <button onclick="submitFake()">提交伪答案</button>
-      </div>
-
-      <div id="offlineBox" class="hidden">
-        <div style="margin-top:8px">线下模式：大家先自由发言，再由主持人录入候选答案并开始投票。</div>
-        <textarea id="offlineOptions" rows="5" style="width:100%" placeholder="每行一个候选答案（建议把真答案也放进去）"></textarea>
-        <button onclick="startOfflineVote()">直接进入票选</button>
+    <div class="card">
+      <h3>闭眼环节（线下主持流程）</h3>
+      <ol>
+        <li>主持人喊：天黑请闭眼</li>
+        <li>主持人喊：老实人请睁眼（仅老实人看真实定义）</li>
+        <li>主持人喊：所有人请睁眼</li>
+      </ol>
+      <button onclick="revealHonest()">显示“老实人专属查看”（传手机给该玩家）</button>
+      <div id="honestBox" class="hidden">
+        <div>老实人：<b id="honestName"></b></div>
+        <div>真实定义：<b id="truth"></b></div>
+        <button onclick="hideHonest()">已看完，隐藏</button>
       </div>
     </div>
 
+    <div class="card">
+      <h3>发言阶段</h3>
+      <div>线下自由发言：每人依次解释词义（老实人说真话，瞎掰王即兴编造）。</div>
+      <button onclick="goVote()">进入投票阶段</button>
+    </div>
+
     <div id="voteBox" class="card hidden">
-      <div><b id="voterName"></b> 请投票（哪个是真答案）</div>
-      <div id="options"></div>
+      <h3>投票阶段（仅大聪明投票）</h3>
+      <div>请 <b id="smartName2"></b> 选择你认为的“老实人”：</div>
+      <div id="voteOptions"></div>
     </div>
 
     <div class="card">
       <h3>积分榜</h3>
       <div id="score"></div>
     </div>
+
+    <div class="card" id="nextBox"></div>
   </div>
 
 <script>
 const deck=[
- {q:'“塞班”最初指的是什么？',a:'太平洋上的塞班岛'},
- {q:'“乌龙茶”中“乌龙”本意最接近？',a:'一种茶树/茶名来源称呼'},
- {q:'“维纳斯效应”常指什么现象？',a:'人在镜中看到自己角度与旁观者不同'},
- {q:'“巴别塔问题”常比喻什么？',a:'语言或标准不统一导致协作困难'},
- {q:'“黑天鹅事件”在投资里常指？',a:'低概率但高冲击的意外事件'}
+  {term:'黑天鹅事件',truth:'低概率但高冲击的意外事件'},
+  {term:'巴别塔问题',truth:'语言或标准不统一导致协作困难'},
+  {term:'维纳斯效应',truth:'镜中视角与旁观视角并不一致的认知现象'},
+  {term:'塞班',truth:'太平洋上的塞班岛'},
+  {term:'马太效应',truth:'强者愈强、弱者愈弱的累积效应'}
 ];
+
 let state={};
-function shuffle(a){return a.sort(()=>Math.random()-0.5)}
+
+function shuffle(a){return [...a].sort(()=>Math.random()-0.5)}
+
 function startGame(){
   const players=document.getElementById('players').value.split(',').map(x=>x.trim()).filter(Boolean);
-  const mode=document.getElementById('mode').value;
-  if(players.length<3){alert('至少3名玩家');return}
-  state={players,mode,scores:Object.fromEntries(players.map(p=>[p,0])),round:1,idx:0,fakes:{},votes:{},card:deck[Math.floor(Math.random()*deck.length)]};
+  const maxRounds=parseInt(document.getElementById('maxRounds').value,10);
+  if(players.length<3 || players.length>9){alert('人数需为3-9人');return}
+  state={players,maxRounds,round:0,scores:Object.fromEntries(players.map(p=>[p,0]))};
+  document.getElementById('setupBox').classList.add('hidden');
   document.getElementById('game').classList.remove('hidden');
+  nextRound();
+}
+
+function assignRoles(players){
+  const s=shuffle(players);
+  return {smart:s[0], honest:s[1], bluffers:s.slice(2)};
+}
+
+function nextRound(){
+  state.round += 1;
+  state.card = deck[Math.floor(Math.random()*deck.length)];
+  state.roles = assignRoles(state.players);
+  state.voted=false;
+
+  document.getElementById('roundNo').innerText=state.round;
+  document.getElementById('roundMax').innerText=state.maxRounds;
+  document.getElementById('term').innerText=state.card.term;
+  document.getElementById('smartName').innerText=state.roles.smart;
+  document.getElementById('smartName2').innerText=state.roles.smart;
+  document.getElementById('honestName').innerText=state.roles.honest;
+  document.getElementById('truth').innerText=state.card.truth;
+  document.getElementById('honestBox').classList.add('hidden');
   document.getElementById('voteBox').classList.add('hidden');
-  document.getElementById('onlineBox').classList.toggle('hidden',mode!=='online');
-  document.getElementById('offlineBox').classList.toggle('hidden',mode!=='offline');
-  renderInput();renderScore();
-}
-function renderInput(){
-  const p=state.players[state.idx] || '-';
-  document.getElementById('round').innerText=state.round;
-  document.getElementById('question').innerText='题目：'+state.card.q;
-  document.getElementById('currentPlayer').innerText=p;
-  document.getElementById('fakeAnswer').value='';
-  document.getElementById('offlineOptions').value='';
-}
-function submitFake(){
-  const p=state.players[state.idx];
-  const v=document.getElementById('fakeAnswer').value.trim();
-  if(!v){alert('请输入答案');return}
-  state.fakes[p]=v;
-  state.idx++;
-  if(state.idx<state.players.length){renderInput();return}
-  state.options=shuffle([{owner:'真答案',text:state.card.a},...Object.entries(state.fakes).map(([p,t])=>({owner:p,text:t}))]);
-  startVote();
-}
-function startOfflineVote(){
-  const lines=document.getElementById('offlineOptions').value
-    .split('\n').map(s=>s.trim()).filter(Boolean);
-  if(lines.length<2){alert('请至少录入2个候选答案');return}
-  // 线下模式下，候选答案由玩家口头给出并由主持人录入，默认不进行“骗分”归属
-  state.options=shuffle(lines.map(t=>({owner:'线下候选',text:t})));
-  // 若主持人未录入真答案，自动补入真答案防止无正确项
-  if(!lines.includes(state.card.a)) state.options.push({owner:'真答案',text:state.card.a});
-  startVote();
-}
-function startVote(){
-  document.getElementById('voteBox').classList.remove('hidden');
-  state.voteOrder=[...state.players];state.voteIdx=0;state.votes={};
-  askVote();
-}
-function askVote(){
-  if(state.voteIdx>=state.voteOrder.length){return finishRound()}
-  const voter=state.voteOrder[state.voteIdx];
-  document.getElementById('voterName').innerText=voter;
-  const el=document.getElementById('options');el.innerHTML='';
-  state.options.forEach((o,i)=>{
-    const b=document.createElement('button');b.innerText=`${i+1}. ${o.text}`;
-    b.onclick=()=>{state.votes[voter]=o;state.voteIdx++;askVote()};
-    el.appendChild(b);el.appendChild(document.createElement('br'));
-  });
-}
-function finishRound(){
-  for(const [voter,pick] of Object.entries(state.votes)){
-    if(pick.owner==='真答案') state.scores[voter]+=2;
-    else if(state.mode==='online' && pick.owner!==voter && pick.owner!=='线下候选') state.scores[pick.owner]+=1;
-  }
-  alert('本轮结束！真答案：'+state.card.a);
+  document.getElementById('nextBox').innerHTML='';
   renderScore();
 }
+
+function revealHonest(){ document.getElementById('honestBox').classList.remove('hidden'); }
+function hideHonest(){ document.getElementById('honestBox').classList.add('hidden'); }
+
+function goVote(){
+  const box=document.getElementById('voteBox');
+  box.classList.remove('hidden');
+  const el=document.getElementById('voteOptions');
+  el.innerHTML='';
+  state.players.filter(p=>p!==state.roles.smart).forEach(p=>{
+    const b=document.createElement('button');
+    b.innerText=p;
+    b.onclick=()=>finishVote(p);
+    el.appendChild(b);
+  });
+}
+
+function finishVote(pick){
+  if(state.voted) return;
+  state.voted=true;
+  const smart=state.roles.smart;
+  const honest=state.roles.honest;
+
+  if(pick===honest){
+    state.scores[smart]+=2;
+    state.scores[honest]+=2;
+    alert(`猜中！大聪明(${smart}) +2，老实人(${honest}) +2`);
+  }else{
+    state.roles.bluffers.forEach(p=>state.scores[p]+=1);
+    alert(`猜错！瞎掰王每人 +1\n真实老实人是：${honest}`);
+  }
+
+  renderScore();
+
+  if(state.round<state.maxRounds){
+    document.getElementById('nextBox').innerHTML='<button onclick="nextRound()">下一轮</button>';
+  }else{
+    const rank=Object.entries(state.scores).sort((a,b)=>b[1]-a[1]);
+    document.getElementById('nextBox').innerHTML=`<h3>游戏结束</h3><div>冠军：<b>${rank[0][0]}</b>（${rank[0][1]}分）</div><button onclick="location.reload()">重新开始</button>`;
+  }
+}
+
 function renderScore(){
   const arr=Object.entries(state.scores).sort((a,b)=>b[1]-a[1]);
   document.getElementById('score').innerHTML=arr.map(([p,s])=>`${p}: ${s} 分`).join('<br>');
