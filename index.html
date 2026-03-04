@@ -28,27 +28,18 @@
       <div><b>第 <span id="roundNo"></span> / <span id="roundMax"></span> 轮</b></div>
       <div>词条：<b id="term"></b></div>
       <div style="margin-top:8px">公开身份：大聪明 = <b id="smartName"></b></div>
-      <div>（其余玩家身份保密，先完成“闭眼环节”）</div>
     </div>
 
     <div class="card">
-      <h3>闭眼环节（线下主持流程）</h3>
-      <ol>
-        <li>主持人喊：天黑请闭眼</li>
-        <li>主持人喊：老实人请睁眼（仅老实人看真实定义）</li>
-        <li>主持人喊：所有人请睁眼</li>
-      </ol>
-      <button onclick="revealHonest()">显示“老实人专属查看”（传手机给该玩家）</button>
-      <div id="honestBox" class="hidden">
-        <div>老实人：<b id="honestName"></b></div>
-        <div>真实定义：<b id="truth"></b></div>
-        <button onclick="hideHonest()">已看完，隐藏</button>
-      </div>
+      <h3>个人查看（每人看自己手机）</h3>
+      <div>每位玩家点击自己的名字查看本轮私密信息：</div>
+      <div id="peekBtns"></div>
+      <div id="peekResult" style="margin-top:8px"></div>
     </div>
 
     <div class="card">
       <h3>发言阶段</h3>
-      <div>线下自由发言：每人依次解释词义（老实人说真话，瞎掰王即兴编造）。</div>
+      <div>所有人依次发言解释词义：老实人说真实定义，瞎掰王自由发挥。</div>
       <button onclick="goVote()">进入投票阶段</button>
     </div>
 
@@ -76,7 +67,6 @@ const deck=[
 ];
 
 let state={};
-
 function shuffle(a){return [...a].sort(()=>Math.random()-0.5)}
 
 function startGame(){
@@ -105,16 +95,32 @@ function nextRound(){
   document.getElementById('term').innerText=state.card.term;
   document.getElementById('smartName').innerText=state.roles.smart;
   document.getElementById('smartName2').innerText=state.roles.smart;
-  document.getElementById('honestName').innerText=state.roles.honest;
-  document.getElementById('truth').innerText=state.card.truth;
-  document.getElementById('honestBox').classList.add('hidden');
   document.getElementById('voteBox').classList.add('hidden');
+  document.getElementById('peekResult').innerHTML='';
   document.getElementById('nextBox').innerHTML='';
+  renderPeekBtns();
   renderScore();
 }
 
-function revealHonest(){ document.getElementById('honestBox').classList.remove('hidden'); }
-function hideHonest(){ document.getElementById('honestBox').classList.add('hidden'); }
+function renderPeekBtns(){
+  const el=document.getElementById('peekBtns');
+  el.innerHTML='';
+  state.players.forEach(p=>{
+    const b=document.createElement('button');
+    b.innerText=p;
+    b.onclick=()=>peekAs(p);
+    el.appendChild(b);
+  });
+}
+
+function peekAs(player){
+  const isHonest = player===state.roles.honest;
+  const role = player===state.roles.smart ? '大聪明' : (isHonest ? '老实人' : '瞎掰王');
+  const msg = isHonest
+    ? `你是【${role}】。真实定义：${state.card.truth}`
+    : `你是【${role}】。你的定义区域是空白，请即兴瞎掰。`;
+  document.getElementById('peekResult').innerHTML = `<b>${player}</b>：${msg}`;
+}
 
 function goVote(){
   const box=document.getElementById('voteBox');
