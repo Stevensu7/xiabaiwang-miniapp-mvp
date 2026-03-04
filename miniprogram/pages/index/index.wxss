@@ -1,0 +1,1 @@
+.container{padding:24rpx}.card{border:1px solid #ddd;border-radius:16rpx;padding:20rpx;margin-bottom:16rpx}.title{font-size:36rpx;font-weight:700;display:block;margin-bottom:12rpx}textarea,input{border:1px solid #ccc;border-radius:10rpx;padding:10rpx;margin:10rpx 0}

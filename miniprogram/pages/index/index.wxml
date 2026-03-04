@@ -1,0 +1,19 @@
+<view class="container">
+  <view class="card">
+    <text class="title">瞎掰王（小程序MVP）</text>
+    <input placeholder="玩家昵称，逗号分隔" value="{{playersInput}}" bindinput="onPlayersInput" />
+    <button type="primary" bindtap="startGame">开始游戏</button>
+  </view>
+
+  <view wx:if="{{started}}" class="card">
+    <text>题目：{{card.q}}</text>
+    <text>当前玩家：{{currentPlayer}}</text>
+    <textarea placeholder="输入伪答案" value="{{draft}}" bindinput="onDraft"/>
+    <button bindtap="submitDraft">提交伪答案</button>
+  </view>
+
+  <view class="card" wx:if="{{started}}">
+    <text>积分榜</text>
+    <view wx:for="{{scoreList}}" wx:key="name">{{item.name}}：{{item.score}}</view>
+  </view>
+</view>
