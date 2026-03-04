@@ -8,7 +8,6 @@
     body{font-family:Arial,"PingFang SC",sans-serif;max-width:900px;margin:20px auto;padding:0 12px}
     .card{border:1px solid #ddd;border-radius:10px;padding:14px;margin:10px 0}
     input,button,textarea,select{padding:8px;margin:4px 0}
-    .row{display:flex;gap:8px;flex-wrap:wrap}
     .hidden{display:none}
   </style>
 </head>
@@ -17,6 +16,13 @@
   <div class="card">
     <div>玩家（逗号分隔）</div>
     <input id="players" style="width:100%" value="小明,小红,小刚" />
+    <div>
+      <label>模式：</label>
+      <select id="mode">
+        <option value="online">线上（每人提交伪答案）</option>
+        <option value="offline">线下（自由发言后直接票选）</option>
+      </select>
+    </div>
     <button onclick="startGame()">开始游戏</button>
   </div>
 
@@ -24,9 +30,18 @@
     <div class="card">
       <div><b>回合 <span id="round"></span></b></div>
       <div id="question"></div>
-      <div style="margin-top:8px">当前提交玩家：<b id="currentPlayer"></b></div>
-      <textarea id="fakeAnswer" rows="3" style="width:100%" placeholder="输入你认为能骗到别人的答案"></textarea>
-      <button onclick="submitFake()">提交伪答案</button>
+
+      <div id="onlineBox">
+        <div style="margin-top:8px">当前提交玩家：<b id="currentPlayer"></b></div>
+        <textarea id="fakeAnswer" rows="3" style="width:100%" placeholder="输入你认为能骗到别人的答案"></textarea>
+        <button onclick="submitFake()">提交伪答案</button>
+      </div>
+
+      <div id="offlineBox" class="hidden">
+        <div style="margin-top:8px">线下模式：大家先自由发言，再由主持人录入候选答案并开始投票。</div>
+        <textarea id="offlineOptions" rows="5" style="width:100%" placeholder="每行一个候选答案（建议把真答案也放进去）"></textarea>
+        <button onclick="startOfflineVote()">直接进入票选</button>
+      </div>
     </div>
 
     <div id="voteBox" class="card hidden">
@@ -52,17 +67,22 @@ let state={};
 function shuffle(a){return a.sort(()=>Math.random()-0.5)}
 function startGame(){
   const players=document.getElementById('players').value.split(',').map(x=>x.trim()).filter(Boolean);
+  const mode=document.getElementById('mode').value;
   if(players.length<3){alert('至少3名玩家');return}
-  state={players,scores:Object.fromEntries(players.map(p=>[p,0])),round:1,idx:0,fakes:{},votes:{},card:deck[Math.floor(Math.random()*deck.length)]};
+  state={players,mode,scores:Object.fromEntries(players.map(p=>[p,0])),round:1,idx:0,fakes:{},votes:{},card:deck[Math.floor(Math.random()*deck.length)]};
   document.getElementById('game').classList.remove('hidden');
+  document.getElementById('voteBox').classList.add('hidden');
+  document.getElementById('onlineBox').classList.toggle('hidden',mode!=='online');
+  document.getElementById('offlineBox').classList.toggle('hidden',mode!=='offline');
   renderInput();renderScore();
 }
 function renderInput(){
-  const p=state.players[state.idx];
+  const p=state.players[state.idx] || '-';
   document.getElementById('round').innerText=state.round;
   document.getElementById('question').innerText='题目：'+state.card.q;
   document.getElementById('currentPlayer').innerText=p;
   document.getElementById('fakeAnswer').value='';
+  document.getElementById('offlineOptions').value='';
 }
 function submitFake(){
   const p=state.players[state.idx];
@@ -71,12 +91,22 @@ function submitFake(){
   state.fakes[p]=v;
   state.idx++;
   if(state.idx<state.players.length){renderInput();return}
+  state.options=shuffle([{owner:'真答案',text:state.card.a},...Object.entries(state.fakes).map(([p,t])=>({owner:p,text:t}))]);
+  startVote();
+}
+function startOfflineVote(){
+  const lines=document.getElementById('offlineOptions').value
+    .split('\n').map(s=>s.trim()).filter(Boolean);
+  if(lines.length<2){alert('请至少录入2个候选答案');return}
+  // 线下模式下，候选答案由玩家口头给出并由主持人录入，默认不进行“骗分”归属
+  state.options=shuffle(lines.map(t=>({owner:'线下候选',text:t})));
+  // 若主持人未录入真答案，自动补入真答案防止无正确项
+  if(!lines.includes(state.card.a)) state.options.push({owner:'真答案',text:state.card.a});
   startVote();
 }
 function startVote(){
   document.getElementById('voteBox').classList.remove('hidden');
-  state.voteOrder=[...state.players];state.voteIdx=0;
-  state.options=shuffle([{owner:'真答案',text:state.card.a},...Object.entries(state.fakes).map(([p,t])=>({owner:p,text:t}))]);
+  state.voteOrder=[...state.players];state.voteIdx=0;state.votes={};
   askVote();
 }
 function askVote(){
@@ -93,7 +123,7 @@ function askVote(){
 function finishRound(){
   for(const [voter,pick] of Object.entries(state.votes)){
     if(pick.owner==='真答案') state.scores[voter]+=2;
-    else if(pick.owner!==voter) state.scores[pick.owner]+=1;
+    else if(state.mode==='online' && pick.owner!==voter && pick.owner!=='线下候选') state.scores[pick.owner]+=1;
   }
   alert('本轮结束！真答案：'+state.card.a);
   renderScore();
