@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>瞎掰王 MVP</title>
+  <style>
+    body{font-family:Arial,"PingFang SC",sans-serif;max-width:900px;margin:20px auto;padding:0 12px}
+    .card{border:1px solid #ddd;border-radius:10px;padding:14px;margin:10px 0}
+    input,button,textarea,select{padding:8px;margin:4px 0}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <h2>瞎掰王（在线测试 MVP）</h2>
+  <div class="card">
+    <div>玩家（逗号分隔）</div>
+    <input id="players" style="width:100%" value="小明,小红,小刚" />
+    <button onclick="startGame()">开始游戏</button>
+  </div>
+
+  <div id="game" class="hidden">
+    <div class="card">
+      <div><b>回合 <span id="round"></span></b></div>
+      <div id="question"></div>
+      <div style="margin-top:8px">当前提交玩家：<b id="currentPlayer"></b></div>
+      <textarea id="fakeAnswer" rows="3" style="width:100%" placeholder="输入你认为能骗到别人的答案"></textarea>
+      <button onclick="submitFake()">提交伪答案</button>
+    </div>
+
+    <div id="voteBox" class="card hidden">
+      <div><b id="voterName"></b> 请投票（哪个是真答案）</div>
+      <div id="options"></div>
+    </div>
+
+    <div class="card">
+      <h3>积分榜</h3>
+      <div id="score"></div>
+    </div>
+  </div>
+
+<script>
+const deck=[
+ {q:'“塞班”最初指的是什么？',a:'太平洋上的塞班岛'},
+ {q:'“乌龙茶”中“乌龙”本意最接近？',a:'一种茶树/茶名来源称呼'},
+ {q:'“维纳斯效应”常指什么现象？',a:'人在镜中看到自己角度与旁观者不同'},
+ {q:'“巴别塔问题”常比喻什么？',a:'语言或标准不统一导致协作困难'},
+ {q:'“黑天鹅事件”在投资里常指？',a:'低概率但高冲击的意外事件'}
+];
+let state={};
+function shuffle(a){return a.sort(()=>Math.random()-0.5)}
+function startGame(){
+  const players=document.getElementById('players').value.split(',').map(x=>x.trim()).filter(Boolean);
+  if(players.length<3){alert('至少3名玩家');return}
+  state={players,scores:Object.fromEntries(players.map(p=>[p,0])),round:1,idx:0,fakes:{},votes:{},card:deck[Math.floor(Math.random()*deck.length)]};
+  document.getElementById('game').classList.remove('hidden');
+  renderInput();renderScore();
+}
+function renderInput(){
+  const p=state.players[state.idx];
+  document.getElementById('round').innerText=state.round;
+  document.getElementById('question').innerText='题目：'+state.card.q;
+  document.getElementById('currentPlayer').innerText=p;
+  document.getElementById('fakeAnswer').value='';
+}
+function submitFake(){
+  const p=state.players[state.idx];
+  const v=document.getElementById('fakeAnswer').value.trim();
+  if(!v){alert('请输入答案');return}
+  state.fakes[p]=v;
+  state.idx++;
+  if(state.idx<state.players.length){renderInput();return}
+  startVote();
+}
+function startVote(){
+  document.getElementById('voteBox').classList.remove('hidden');
+  state.voteOrder=[...state.players];state.voteIdx=0;
+  state.options=shuffle([{owner:'真答案',text:state.card.a},...Object.entries(state.fakes).map(([p,t])=>({owner:p,text:t}))]);
+  askVote();
+}
+function askVote(){
+  if(state.voteIdx>=state.voteOrder.length){return finishRound()}
+  const voter=state.voteOrder[state.voteIdx];
+  document.getElementById('voterName').innerText=voter;
+  const el=document.getElementById('options');el.innerHTML='';
+  state.options.forEach((o,i)=>{
+    const b=document.createElement('button');b.innerText=`${i+1}. ${o.text}`;
+    b.onclick=()=>{state.votes[voter]=o;state.voteIdx++;askVote()};
+    el.appendChild(b);el.appendChild(document.createElement('br'));
+  });
+}
+function finishRound(){
+  for(const [voter,pick] of Object.entries(state.votes)){
+    if(pick.owner==='真答案') state.scores[voter]+=2;
+    else if(pick.owner!==voter) state.scores[pick.owner]+=1;
+  }
+  alert('本轮结束！真答案：'+state.card.a);
+  renderScore();
+}
+function renderScore(){
+  const arr=Object.entries(state.scores).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('score').innerHTML=arr.map(([p,s])=>`${p}: ${s} 分`).join('<br>');
+}
+</script>
+</body>
+</html>
