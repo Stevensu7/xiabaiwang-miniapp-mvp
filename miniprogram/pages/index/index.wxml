@@ -1,19 +1,41 @@
 <view class="container">
-  <view class="card">
-    <text class="title">瞎掰王（小程序MVP）</text>
-    <input placeholder="玩家昵称，逗号分隔" value="{{playersInput}}" bindinput="onPlayersInput" />
+  <!-- 开始界面 -->
+  <view class="card" wx:if="{{!started}}">
+    <text class="title">瞎掰王</text>
+    <text class="subtitle">谁是谎言大师？</text>
+
+    <view class="input-group">
+      <text class="label">玩家昵称</text>
+      <input placeholder="例如：张三,李四,王五" value="{{playersInput}}" bindinput="onPlayersInput" />
+      <text class="hint">多个玩家请用逗号分隔</text>
+    </view>
+
     <button type="primary" bindtap="startGame">开始游戏</button>
   </view>
 
-  <view wx:if="{{started}}" class="card">
-    <text>题目：{{card.q}}</text>
-    <text>当前玩家：{{currentPlayer}}</text>
-    <textarea placeholder="输入伪答案" value="{{draft}}" bindinput="onDraft"/>
-    <button bindtap="submitDraft">提交伪答案</button>
-  </view>
+  <!-- 游戏进行中 -->
+  <block wx:if="{{started}}">
+    <view class="card game-card">
+      <text class="question">题目：{{card.q}}</text>
+      <text class="current-player">轮到：{{currentPlayer}}</text>
 
-  <view class="card" wx:if="{{started}}">
-    <text>积分榜</text>
-    <view wx:for="{{scoreList}}" wx:key="name">{{item.name}}：{{item.score}}</view>
-  </view>
+      <view class="input-group">
+        <text class="label">你的伪答案</text>
+        <textarea placeholder="编一个听起来很真的答案..." value="{{draft}}" bindinput="onDraft"/>
+      </view>
+
+      <button type="primary" bindtap="submitDraft">提交</button>
+    </view>
+
+    <!-- 积分榜 -->
+    <view class="card">
+      <text class="score-title">积分榜</text>
+      <view class="score-list">
+        <view wx:for="{{scoreList}}" wx:key="name" class="score-item">
+          <text class="score-name">{{item.name}}</text>
+          <text class="score-value">{{item.score}} 分</text>
+        </view>
+      </view>
+    </view>
+  </block>
 </view>

@@ -1,9 +1,9 @@
 {
   "pages": ["pages/index/index"],
   "window": {
-    "navigationBarTitleText": "瞎掰王MVP",
-    "navigationBarBackgroundColor": "#ffffff",
-    "navigationBarTextStyle": "black"
+    "navigationBarTitleText": "瞎掰王",
+    "navigationBarBackgroundColor": "#6366F1",
+    "navigationBarTextStyle": "white"
   },
   "style": "v2"
 }

@@ -1,1 +1,219 @@
-.container{padding:24rpx}.card{border:1px solid #ddd;border-radius:16rpx;padding:20rpx;margin-bottom:16rpx}.title{font-size:36rpx;font-weight:700;display:block;margin-bottom:12rpx}textarea,input{border:1px solid #ccc;border-radius:10rpx;padding:10rpx;margin:10rpx 0}
+/* 瞎掰王 MVP — 现代化 UI 设计系统 */
+
+page {
+  background: linear-gradient(180deg, #F8FAFC 0%, #EFF6FF 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #1E293B;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.container {
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+/* 卡片 */
+.card {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 8rpx 24rpx rgba(99, 102, 241, 0.08), 0 2rpx 6rpx rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 标题组 */
+.title {
+  font-size: 52rpx;
+  font-weight: 800;
+  color: #6366F1;
+  letter-spacing: -1px;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #64748B;
+  margin-bottom: 40rpx;
+  display: block;
+}
+
+/* 输入组 */
+.input-group {
+  margin: 24rpx 0;
+}
+
+.label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 12rpx;
+}
+
+.hint {
+  display: block;
+  font-size: 24rpx;
+  color: #94A3B8;
+  margin-top: 8rpx;
+}
+
+/* 输入框 */
+input, textarea {
+  width: 100%;
+  background: #F1F5F9;
+  border: 2rpx solid transparent;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  font-size: 30rpx;
+  color: #334155;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+input:focus, textarea:focus {
+  background: #FFFFFF;
+  border-color: #6366F1;
+  box-shadow: 0 0 0 4rpx rgba(99, 102, 241, 0.12);
+  outline: none;
+}
+
+textarea {
+  min-height: 160rpx;
+}
+
+/* 按钮 */
+button[type="primary"] {
+  width: 100%;
+  height: 96rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+  color: #FFFFFF;
+  font-size: 32rpx;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 8rpx 16rpx rgba(99, 102, 241, 0.3);
+  transition: all 0.2s ease;
+  margin-top: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button[type="primary"]:active {
+  opacity: 0.92;
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 8rpx rgba(99, 102, 241, 0.2);
+}
+
+button {
+  border-radius: 12rpx;
+  font-weight: 500;
+}
+
+/* 游戏卡片 */
+.game-card .question {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #6366F1;
+  margin-bottom: 24rpx;
+  display: block;
+}
+
+.current-player {
+  font-size: 28rpx;
+  color: #64748B;
+  margin-bottom: 24rpx;
+  display: block;
+  padding: 12rpx 16rpx;
+  background: #F1F5F9;
+  border-radius: 8rpx;
+  align-self: flex-start;
+}
+
+/* 积分榜 */
+.score-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #6366F1;
+  margin-bottom: 24rpx;
+  display: block;
+}
+
+.score-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  background: #F8FAFC;
+  border-radius: 12rpx;
+}
+
+.score-item:last-child {
+  margin-bottom: 0;
+}
+
+.score-name {
+  font-size: 30rpx;
+  color: #334155;
+  font-weight: 500;
+}
+
+.score-value {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #10B981;
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  page {
+    background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+    color: #F1F5F9;
+  }
+
+  .card {
+    background: #1E293B;
+    box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.4);
+  }
+
+  .title, .subtitle, .score-title, .game-card .question {
+    color: #A5B4FC;
+  }
+
+  .label, .score-name, .current-player {
+    color: #CBD5E1;
+  }
+
+  .hint {
+    color: #64748B;
+  }
+
+  input, textarea {
+    background: #334155;
+    color: #F1F5F9;
+  }
+
+  input:focus, textarea:focus {
+    background: #475569;
+    border-color: #818CF8;
+    box-shadow: 0 0 0 4rpx rgba(129, 140, 248, 0.2);
+  }
+
+  button[type="primary"] {
+    background: linear-gradient(135deg, #818CF8 0%, #A78BFA 100%);
+    box-shadow: 0 8rpx 16rpx rgba(129, 140, 248, 0.3);
+  }
+
+  .score-item {
+    background: #334155;
+  }
+}
