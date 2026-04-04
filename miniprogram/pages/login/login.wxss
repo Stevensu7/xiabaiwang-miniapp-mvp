@@ -1,0 +1,35 @@
+/* 登录页 */
+page {
+  background: linear-gradient(180deg, #F8FAFC 0%, #EFF6FF 100%);
+  min-height: 100vh;
+}
+.container {
+  padding: 60rpx 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-card {
+  width: 100%;
+  text-align: center;
+  padding: 60rpx 40rpx;
+}
+.title {
+  font-size: 64rpx;
+  font-weight: 800;
+  color: #6366F1;
+  margin-bottom: 16rpx;
+  display: block;
+}
+.desc {
+  font-size: 28rpx;
+  color: #64748B;
+  margin-bottom: 60rpx;
+  display: block;
+}
+.terms {
+  display: block;
+  font-size: 24rpx;
+  color: #94A3B8;
+  margin-top: 24rpx;
+}

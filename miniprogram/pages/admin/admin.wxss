@@ -1,0 +1,4 @@
+page { background: #F8FAFC; padding: 32rpx; }
+.title { font-size: 36rpx; font-weight: 700; color: #6366F1; margin-bottom: 24rpx; display: block; }
+.stat { display: block; padding: 20rpx 0; font-size: 28rpx; color: #334155; border-bottom: 1rpx solid #E2E8F0; }
+.stat:last-child { border-bottom: none; }

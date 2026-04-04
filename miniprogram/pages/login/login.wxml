@@ -1,0 +1,12 @@
+<view class="container">
+  <view class="card login-card">
+    <text class="title">瞎掰王</text>
+    <text class="desc">欢迎来到谎言对决</text>
+
+    <button type="primary" open-type="getUserInfo" bindgetuserinfo="onGetUserInfo">
+      <text>微信一键登录</text>
+    </button>
+
+    <text class="terms">登录即表示同意《用户协议》与《隐私政策》</text>
+  </view>
+</view>

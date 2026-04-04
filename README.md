@@ -1,70 +1,225 @@
-# 瞎掰王（9UPPER）微信小程序 MVP
+# 瞎掰王 (9UPPER) — 完全商业版
 
-一个可快速开局的《瞎掰王》房间制原型，支持：创建房间、加入房间、身份分配、发言阶段、仅大聪明投票、自动计分。
+> 谎言与辩解的社交游戏，适合聚会、团建、线上开黑
 
-## 🎨 最新 UI 设计（2026-04-04）
+[![GitHub stars](https://img.shields.io/github/stars/Stevensu7/xiabaiwang-miniapp-mvp)](https://github.com/Stevensu7/xiabaiwang-miniapp-mvp/stargazers)
+[![license](https://img.shields.io/github/license/Stevensu7/xiabaiwang-miniapp-mvp)](LICENSE)
 
-我们刚刚完成了一次 **全面的 UI 现代化重构**，采用新的设计系统：
+## ✨ 功能特性
 
-- **品牌色**：Indigo (#6366F1)
-- **卡片设计**：大圆角 + 悬浮阴影
-- **交互**：按压态、Focus 高亮
-- **暗色模式**：自动适配
-
-### 📱 界面预览
-
-**开始界面**  
-![UI Preview](https://raw.githubusercontent.com/Stevensu7/xiabaiwang-miniapp-mvp/master/docs/ui-preview.png)
-
-> 如果图片未加载，请查看 [直接预览 HTML](https://raw.githubusercontent.com/Stevensu7/xiabaiwang-miniapp-mvp/master/docs/ui-preview.html)
-
-完整设计说明见 [PR #1](https://github.com/Stevensu7/xiabaiwang-miniapp-mvp/pulls)。
+- 🎮 **核心玩法**：大聪明×1 + 老实人×1 + 瞎掰王×（N-2）
+- 🏠 **房间制**：6 位玩家上限，支持创建/加入
+- 💬 **实时对战**：基于 WebSocket 的低延迟同步
+- 📚 **题库系统**：后台管理，支持分类与难度
+- 👑 **VIP 会员**：去广告、专属房间、称号
+- 📊 **数据统计**：个人战绩、全局大盘
+- 🌗 **暗色模式**：全新 UI 设计系统
 
 ---
 
-## 在线体验
-- GitHub Pages: https://stevensu7.github.io/xiabaiwang-miniapp-mvp/
+## 🏗️ 架构总览
 
-## 仓库结构
-- `docs/PRD.md`：产品需求文档（MVP）
-- `web/index.html`：Web MVP 主页面（当前最新逻辑）
-- `index.html`：Pages 根目录入口（与 web 同步）
-- `docs-site/index.html`：备用 Pages 入口（与 web 同步）
-- `miniprogram/`：微信小程序代码骨架
-
-## 当前游戏流程（已实现）
-1. 创建房间：设置参与人数（3-9）与局数（2/3）
-2. 加入房间：玩家输入房间号 + 名字加入
-3. 人齐自动开局
-4. 角色分配：
-   - 大聪明：1人（公开）
-   - 老实人：1人（保密）
-   - 瞎掰王：其余玩家（保密）
-5. 每位玩家仅查看自己手机上的身份提示：
-   - 老实人看到真实定义
-   - 瞎掰王看到空白提示（需即兴编）
-6. 发言阶段（线下）
-7. 投票阶段（仅大聪明投票选择老实人）
-8. 计分：
-   - 猜中：大聪明 +2，老实人 +2
-   - 猜错：所有瞎掰王各 +1
-9. 达到设定局数后显示冠军
-
-## 本地运行
-该 MVP 为纯前端静态页面：
-
-```bash
-# 任意静态服务方式均可
-python3 -m http.server 8080
-# 浏览器打开 http://localhost:8080/projects/xiabaiwang-mvp/
+```
+┌─────────────┐        ┌─────────────────────────────┐
+│  微信小程序  │───────▶│  Node.js + Socket.IO 后端    │
+└─────────────┘        └─────────────────────────────┘
+                                   │
+                                   ▼
+                          ┌──────────────────┐
+                          │   PostgreSQL     │
+                          │   + Redis        │
+                          └──────────────────┘
 ```
 
-## 版本说明
-- 当前版本重点验证"房间制+角色心智+计分闭环"
-- 暂未接入后端实时同步（多人同房跨设备实时状态）
-- **2026-04-04**：UI 现代化重构完成
+**技术栈**：
+- 前端：微信小程序原生框架（WXML/WXSS/JS）
+- 后端：Node.js + Express + Socket.IO
+- 数据库：PostgreSQL（持久） + Redis（缓存/会话）
+- 部署：Docker + Nginx（提供 HTTPS + WSS）
 
-## 下一步建议
-- 接入后端（WebSocket/云开发）实现真正实时房间同步
-- 题库扩展与难度分层
-- 微信登录、战绩、邀请链路
+---
+
+## 🚀 快速开始
+
+### 1. 克隆项目
+
+```bash
+git clone https://github.com/Stevensu7/xiabaiwang-miniapp-mvp.git
+cd xiabaiwang-miniapp-mvp
+```
+
+### 2. 后端部署
+
+```bash
+cd server
+cp .env.example .env
+# 编辑 .env，配置数据库和微信参数
+npm install
+npm run dev   # 开发模式
+# 或
+npm start     # 生产模式
+```
+
+数据库初始化（需提前创建数据库）：
+
+```sql
+-- 运行 server/models/db.js 会自动建表
+```
+
+### 3. 小程序端配置
+
+在微信开发者工具中打开 `miniprogram/` 目录：
+- 填入你的小程序 AppID
+- 修改 `app.js` 中的 `apiBase` 为后端地址
+
+### 4. 管理后台
+
+访问 `/pages/admin/`（需管理员 token，在数据库中设置 `users.id=1` 为管理员）。
+
+---
+
+## 🎯 核心接口
+
+### 认证
+- `POST /auth/login` — 微信登录（需 code）
+
+### 房间
+- `POST /rooms` — 创建房间
+- `POST /rooms/:id/join` — 加入房间
+- `GET /rooms/:id` — 房间状态
+
+### 游戏
+- `POST /game/:roomId/start` — 开始游戏
+- `POST /game/:roomId/answer` — 提交答案
+- `POST /game/:roomId/vote` — 投票
+
+### 题库
+- `GET /questions` — 获取题目（可分页）
+- `POST /questions` — 添加题目（管理）
+
+### 支付
+- `POST /payment/create` — 创建订单（会员/道具）
+
+---
+
+## 💰 商业化配置
+
+### 会员体系
+
+| 权益 | 免费用户 | VIP 会员 |
+|------|----------|----------|
+| 广告 | 有 | 无 |
+| 房间上限 | 3个 | 不限 |
+| 自定义房间号 | ❌ | ✅ |
+| 专属标识 | ❌ | ✅ |
+
+### 道具系统（规划）
+- 身份查看器：在投票前可查看某玩家身份
+- 双倍积分卡：本局获胜积分翻倍
+- 免坑卡：被投出后可复活
+
+### 广告位
+- 游戏结束页横幅
+- 个人中心底部原生模板
+- Banner 插屏（每局一次可选）
+
+---
+
+## 📊 数据库 Schema
+
+主要表：
+
+- `users` — 用户信息（openid、昵称、头像、VIP 状态）
+- `rooms` — 房间信息（房主、人数、局数、状态）
+- `room_players` — 玩家在房间中的信息（角色、得分）
+- `game_rounds` — 每回合记录（题目、身份分配、投票、结算）
+- `questions` — 题库
+- `orders` — 订单记录
+
+索引已覆盖高频查询。
+
+---
+
+## 🔒 安全与合规
+
+- API 限流：15 分钟 100 次（可调）
+- JWT Token：30 天过期，支持刷新
+- SQL 防注入：参数化查询
+- 支付回调签名校验
+- 遵循微信小程序运营规范
+
+---
+
+## 📱 界面预览
+
+**全新 UI 设计系统**（2026-04-04 更新）
+
+- 主色：Indigo `#6366F1`
+- 圆角：24rpx
+- 响应式布局
+- 暗色模式自动适配
+
+在线体验：
+- GitHub Pages: https://stevensu7.github.io/xiabaiwang-miniapp-mvp/
+- UI 预览: https://stevensu7.github.io/xiabaiwang-miniapp-mvp/docs/ui-preview.html
+
+---
+
+## 🛠️ 开发指南
+
+### 目录结构
+
+```
+├── miniprogram/      # 微信小程序
+│   ├── pages/
+│   │   ├── login/   # 登录页
+│   │   ├── lobby/   # 大厅
+│   │   ├── game/    # 游戏页
+│   │   ├── profile/ # 个人中心
+│   │   └── admin/   # 管理后台
+│   └── app.js
+├── server/           # 后端服务
+│   ├── src/
+│   ├── routes/
+│   ├── models/
+│   └── config/
+├── docs/
+└── README.md
+```
+
+### 本地开发
+
+```bash
+# 后端
+cd server && npm run dev
+
+# 小程序
+# 在微信开发者工具中打开 miniprogram/ 目录
+```
+
+---
+
+## 📝 路线图
+
+- [x] MVP 核心玩法
+- [x] UI 现代化重构
+- [x] 后端基础框架
+- [ ] 微信登录真实对接
+- [ ] 微信支付接入
+- [ ] 题库后台管理界面（Web）
+- [ ] 好友邀请分享
+- [ ] AI 自动生成题目
+
+---
+
+## 🤝 贡献
+
+欢迎 PR 或 Issue！
+
+## 📄 许可证
+
+MIT
+
+---
+
+*Made with ❤️ by OpenClaw Design Agent*

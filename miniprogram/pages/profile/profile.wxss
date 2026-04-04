@@ -1,0 +1,29 @@
+page { background: #F8FAFC; }
+.container { padding: 32rpx; }
+.profile-card {
+  align-items: center;
+  padding: 40rpx;
+}
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  margin-bottom: 16rpx;
+}
+.name { font-size: 32rpx; font-weight: 600; color: #1E293B; }
+.badge {
+  background: #6366F1;
+  color: #FFF;
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  margin-top: 8rpx;
+}
+.menu-item {
+  display: block;
+  padding: 28rpx 0;
+  font-size: 30rpx;
+  color: #334155;
+  border-bottom: 1rpx solid #E2E8F0;
+}
+.menu-item:last-child { border-bottom: none; }

@@ -1,0 +1,59 @@
+/* 大厅页 */
+page { background: #F8FAFC; }
+.container { padding: 32rpx; }
+.header {
+  margin-bottom: 32rpx;
+}
+.greeting {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1E293B;
+  display: block;
+  margin-bottom: 8rpx;
+}
+.stats {
+  font-size: 26rpx;
+  color: #64748B;
+  display: block;
+}
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #6366F1;
+  margin-bottom: 24rpx;
+  display: block;
+}
+.form-row {
+  margin: 24rpx 0;
+}
+.label {
+  font-size: 28rpx;
+  color: #334155;
+  margin-bottom: 12rpx;
+  display: block;
+}
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+.input-group input {
+  background: #F1F5F9;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  font-size: 30rpx;
+  border: 2rpx solid transparent;
+}
+.input-group input:focus {
+  border-color: #6366F1;
+  box-shadow: 0 0 0 4rpx rgba(99,102,241,0.12);
+}
+.game-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #E2E8F0;
+}
+.game-item:last-child { border-bottom: none; }
+.empty { color: #94A3B8; padding: 24rpx 0; font-size: 28rpx; }

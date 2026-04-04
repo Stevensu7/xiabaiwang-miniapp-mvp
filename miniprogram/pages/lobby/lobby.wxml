@@ -1,0 +1,37 @@
+<view class="container">
+  <view class="header">
+    <text class="greeting">你好，{{user.nickname}}</text>
+    <text class="stats">胜率: {{winRate}}% | 总局数: {{totalGames}}</text>
+  </view>
+
+  <view class="card">
+    <text class="section-title">快速开始</text>
+    <view class="form-row">
+      <text class="label">人数（3-9）</text>
+      <slider min="3" max="9" step="1" value="{{maxPlayers}}" bindchange="onMaxPlayersChange" show-value />
+    </view>
+    <view class="form-row">
+      <text class="label">局数</text>
+      <slider min="2" max="5" step="1" value="{{rounds}}" bindchange="onRoundsChange" show-value />
+    </view>
+    <button type="primary" bindtap="createRoom">创建房间</button>
+  </view>
+
+  <view class="card">
+    <text class="section-title">加入房间</text>
+    <view class="input-group">
+      <input placeholder="房间号" value="{{roomId}}" bindinput="onRoomIdInput" />
+      <input placeholder="昵称" value="{{playerName}}" bindinput="onPlayerNameInput" />
+    </view>
+    <button type="primary" bindtap="joinRoom">加入</button>
+  </view>
+
+  <view class="card">
+    <text class="section-title">战绩</text>
+    <view wx:if="{{recentGames.length===0}}" class="empty">暂无记录</view>
+    <view wx:for="{{recentGames}}" wx:key="id" class="game-item">
+      <text>{{roomId}} • 第{{round}}回合 • {{status}}</text>
+      <text>得分: {{score}}</text>
+    </view>
+  </view>
+</view>

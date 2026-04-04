@@ -1,0 +1,11 @@
+<view class="container">
+  <text class="title">管理后台</text>
+  <view class="card">
+    <text class="stat">总用户: {{stats.users}}</text>
+    <text class="stat">总房间: {{stats.rooms}}</text>
+    <text class="stat">总游戏: {{stats.total_games}}</text>
+  </view>
+  <view class="card">
+    <button size="mini" bindtap="refresh">刷新</button>
+  </view>
+</view>

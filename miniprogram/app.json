@@ -1,9 +1,17 @@
 {
-  "pages": ["pages/index/index"],
+  "pages": [
+    "pages/login/login",
+    "pages/lobby/lobby",
+    "pages/game/game",
+    "pages/profile/profile",
+    "pages/admin/admin"
+  ],
   "window": {
     "navigationBarTitleText": "瞎掰王",
     "navigationBarBackgroundColor": "#6366F1",
-    "navigationBarTextStyle": "white"
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F8FAFC"
   },
-  "style": "v2"
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
 }

@@ -1,0 +1,13 @@
+<view class="container">
+  <view class="card profile-card">
+    <image class="avatar" src="{{user.avatar_url}}" />
+    <text class="name">{{user.nickname}}</text>
+    <view class="badge" wx:if="{{user.premium}}">VIP</view>
+  </view>
+
+  <view class="card">
+    <text class="menu-item" bindtap="openVip">🔥 开通 VIP（免广告）</text>
+    <text class="menu-item" bindtap="viewHistory">📜 历史战绩</text>
+    <text class="menu-item" bindtap="about">ℹ️ 关于瞎掰王</text>
+  </view>
+</view>
