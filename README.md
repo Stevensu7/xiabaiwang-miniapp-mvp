@@ -8,7 +8,7 @@
 ## ✨ 功能特性
 
 - 🎮 **核心玩法**：大聪明×1 + 老实人×1 + 瞎掰王×（N-2）
-- 🏠 **房间制**：6 位玩家上限，支持创建/加入
+- 🏠 **房间制**：推荐 4–12 人（最少 4 人），可自定义人数上限
 - 💬 **实时对战**：基于 WebSocket 的低延迟同步
 - 📚 **题库系统**：后台管理，支持分类与难度
 - 👑 **VIP 会员**：去广告、专属房间、称号
@@ -160,8 +160,14 @@ npm start     # 生产模式
 - 暗色模式自动适配
 
 在线体验：
-- GitHub Pages: https://stevensu7.github.io/xiabaiwang-miniapp-mvp/
-- UI 预览: https://stevensu7.github.io/xiabaiwang-miniapp-mvp/docs/ui-preview.html
+
+- **GitHub Pages**: https://stevensu7.github.io/xiabaiwang-miniapp-mvp/
+- **Web 试玩版（无需小程序）**: https://stevensu7.github.io/xiabaiwang-miniapp-mvp/docs/web-demo.html
+
+**试玩说明**：
+- 直接在浏览器打开 `docs/web-demo.html`
+- 输入玩家昵称（逗号分隔），设定人数（4–12）
+- 体验完整游戏流程（模拟多人）
 
 ---
 

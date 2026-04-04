@@ -7,8 +7,8 @@
   <view class="card">
     <text class="section-title">快速开始</text>
     <view class="form-row">
-      <text class="label">人数（3-9）</text>
-      <slider min="3" max="9" step="1" value="{{maxPlayers}}" bindchange="onMaxPlayersChange" show-value />
+      <text class="label">人数（推荐 4–12 人）</text>
+      <slider min="4" max="12" step="1" value="{{maxPlayers}}" bindchange="onMaxPlayersChange" show-value />
     </view>
     <view class="form-row">
       <text class="label">局数</text>

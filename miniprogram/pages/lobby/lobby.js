@@ -4,7 +4,7 @@ const API = `${app.globalData.apiBase}`;
 Page({
   data: {
     user: {},
-    maxPlayers: 6,
+    maxPlayers: 6,  // 默认 6 人
     rounds: 3,
     roomId: '',
     playerName: '',

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>瞎掰王 - Web 在线试玩</title>
+  <style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#F8FAFC 0%,#EFF6FF 100%);min-height:100vh;color:#1E293B;padding:24px}
+.container{max-width:600px;margin:0 auto}
+.card{background:#FFF;border-radius:24px;padding:32px;margin-bottom:24px;box-shadow:0 8px 24px rgba(99,102,241,0.08),0 2px 6px rgba(0,0,0,0.04)}
+.title{font-size:48px;font-weight:800;color:#6366F1;text-align:center;margin-bottom:8px}
+.subtitle{font-size:18px;color:#64748B;text-align:center;margin-bottom:32px}
+.input-group{margin:16px 0}
+.label{display:block;font-size:14px;font-weight:600;color:#334155;margin-bottom:8px}
+input,select,textarea{width:100%;background:#F1F5F9;border:2px solid transparent;border-radius:12px;padding:12px;font-size:16px;color:#334155;box-sizing:border-box;transition:all .2s}
+input:focus,textarea:focus{border-color:#6366F1;box-shadow:0 0 0 4px rgba(99,102,241,0.12);outline:none}
+textarea{min-height:100px;resize:vertical}
+button{width:100%;padding:14px;border-radius:999px;background:linear-gradient(135deg,#6366F1 0%,#8B5CF6 100%);color:#FFF;font-size:16px;font-weight:600;border:none;box-shadow:0 4px 12px rgba(99,102,241,0.3);cursor:pointer;transition:all .2s;margin-top:8px}
+button:hover{opacity:.94}
+button:active{transform:scale(.98)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.section-title{font-size:20px;font-weight:700;color:#6366F1;margin:24px 0 12px}
+.player-tag{display:inline-block;background:#E0E7FF;color:#3730A3;padding:4px 10px;border-radius:999px;font-size:12px;margin:4px}
+.result{margin-top:16px;padding:16px;background:#F1F5F9;border-radius:12px;white-space:pre-wrap}
+.hidden{display:none}
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- 设置界面 -->
+    <div class="card" id="setup">
+      <div class="title">瞎掰王</div>
+      <div class="subtitle">Web 试玩版（4–12人）</div>
+
+      <div class="input-group">
+        <label class="label">玩家人数（4–12）</label>
+        <input type="number" id="playerCount" value="6" min="4" max="12" />
+      </div>
+
+      <div class="input-group">
+        <label class="label">回合数</label>
+        <select id="roundCount">
+          <option value="2">2 局</option>
+          <option value="3" selected>3 局</option>
+          <option value="4">4 局</option>
+          <option value="5">5 局</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label class="label">玩家昵称（用逗号分隔）</label>
+        <textarea id="playerNames" placeholder="张三, 李四, 王五, 赵六, 钱七, 孙八">张三,李四,王五,赵六,钱七,孙八</textarea>
+      </div>
+
+      <button onclick="startGame()">开始游戏</button>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div class="card hidden" id="game">
+      <div class="section-title">第 <span id="roundNo">1</span>/<span id="totalRounds">3</span> 回合</div>
+      <div class="section-title">题目：<span id="question">什么是“引力波”？</span></div>
+
+      <div id="roleCard" class="hidden" style="margin:16px 0;padding:16px;background:#ECFDF5;border-radius:12px;border:1px solid #10B981">
+        <strong>你的身份：<span id="myRole"></span></strong>
+        <p id="roleHint" style="margin-top:8px;font-size:14px;color:#065F46"></p>
+      </div>
+
+      <div class="input-group" id="answerGroup">
+        <label class="label">提交你的答案</label>
+        <textarea id="answer" placeholder="写一个听起来很真的答案..."></textarea>
+        <button onclick="submitAnswer()">提交</button>
+      </div>
+
+      <div id="voteGroup" class="hidden">
+        <label class="label">投票：你认为谁是“老实人”？</label>
+        <div id="voteOptions"></div>
+        <button onclick="castVote()">投票</button>
+      </div>
+
+      <div id="waiting" class="hidden" style="text-align:center;color:#64748B;padding:20px">
+        等待其他玩家...
+      </div>
+
+      <div id="resultPanel" class="hidden">
+        <div class="result" id="resultText"></div>
+        <button onclick="nextRound()" id="nextBtn">下一回合</button>
+      </div>
+    </div>
+
+    <!-- 结束界面 -->
+    <div class="card hidden" id="final">
+      <div class="section-title">🏆 游戏结束</div>
+      <div class="result" id="finalResult"></div>
+      <button onclick="reset()">再来一局</button>
+    </div>
+
+  </div>
+
+  <script>
+// 题库（模拟）
+const QUESTIONS = [
+  {term: "引力波", def: "时空弯曲中的涟漪，由大质量天体加速运动产生"},
+  {term: "区块链", def: "分布式账本技术，数据不可篡改"},
+  {term: "碳中和", def: "通过减排与碳抵消实现净零排放"},
+  {term: "元宇宙", def: "沉浸式虚拟共享空间，融合物理与数字世界"},
+  {term: "量子纠缠", def: "量子粒子间存在的非定域关联"}
+];
+
+// 游戏状态
+let gameState = {};
+
+function startGame() {
+  const count = parseInt(document.getElementById('playerCount').value);
+  const rounds = parseInt(document.getElementById('roundCount').value);
+  const namesStr = document.getElementById('playerNames').value;
+  const names = namesStr.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+
+  if (names.length < 4) return alert('至少需要 4 位玩家');
+  if (names.length !== count) return alert(`人数（${names.length}）与设定的 ${count} 不符`);
+
+  // 初始化
+  gameState = {
+    players: names.map((name,i)=>({id:i+1, name, score:0})),
+    totalRounds: rounds,
+    currentRound: 1,
+    questions: shuffle([...QUESTIONS]).slice(0, rounds),
+    roomId: Math.random().toString(36).substr(2,6).toUpperCase()
+  };
+  initRound();
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+}
+
+function initRound() {
+  const round = gameState.currentRound;
+  const question = gameState.questions[round-1];
+  const n = gameState.players.length;
+  const indices = [...Array(n).keys()];
+  shuffle(indices);
+  const roles = {};
+  roles[gameState.players[indices[0]].id] = '大聪明';
+  roles[gameState.players[indices[1]].id] = '老实人';
+  for(let i=2;i<n;i++) roles[gameState.players[indices[i]].id] = '瞎掰王';
+
+  gameState.currentRoles = roles;
+  gameState.question = question;
+  gameState.answers = {};
+  gameState.votes = {};
+  gameState.finished = new Set();
+
+  // 更新 UI
+  document.getElementById('roundNo').textContent = round;
+  document.getElementById('totalRounds').textContent = gameState.totalRounds;
+  document.getElementById('question').textContent = question.term;
+
+  // 模拟当前玩家（随机选一个）
+  const myId = gameState.players[0].id; // 简化为第一个玩家视角
+  const myRole = roles[myId];
+  const roleCard = document.getElementById('roleCard');
+  const answerGroup = document.getElementById('answerGroup');
+  const voteGroup = document.getElementById('voteGroup');
+  const waiting = document.getElementById('waiting');
+  const resultPanel = document.getElementById('resultPanel');
+
+  roleCard.classList.remove('hidden');
+  document.getElementById('myRole').textContent = myRole;
+  const hintEl = document.getElementById('roleHint');
+  if (myRole === '老实人') {
+    hintEl.textContent = `正确定义：${question.def}`;
+    answerGroup.classList.add('hidden');
+    voteGroup.classList.add('hidden');
+    waiting.classList.remove('hidden');
+  } else if (myRole === '大聪明') {
+    hintEl.textContent = '你是大聪明（公开身份），等待所有人提交后投票找出老实人';
+    answerGroup.classList.add('hidden');
+    voteGroup.classList.add('hidden');
+    waiting.classList.remove('hidden');
+  } else {
+    hintEl.textContent = '你需要编一个看起来很真的答案，骗过其他人！';
+    answerGroup.classList.remove('hidden');
+    voteGroup.classList.add('hidden');
+    waiting.classList.add('hidden');
+  }
+
+  resultPanel.classList.add('hidden');
+}
+
+function submitAnswer() {
+  const answer = document.getElementById('answer').value.trim();
+  if (!answer) return alert('请输入答案');
+  gameState.answers[1] = answer; // 模拟自己提交
+  document.getElementById('answerGroup').classList.add('hidden');
+  document.getElementById('waiting').classList.remove('hidden');
+
+  // 模拟其他玩家提交（随机延迟）
+  const others = gameState.players.slice(1).map(p=>p.id);
+  let completed = 0;
+  others.forEach(id=>{
+    setTimeout(()=>{
+      gameState.answers[id] = "模拟答案" + Math.floor(Math.random()*100);
+      completed++;
+      if(completed===others.length) showVoting();
+    }, 1000+Math.random()*2000);
+  });
+}
+
+function showVoting() {
+  document.getElementById('waiting').classList.add('hidden');
+  const myRole = gameState.currentRoles[1];
+  if (myRole === '大聪明') {
+    // 大聪明投票
+    const voteOpts = document.getElementById('voteOptions');
+    voteOpts.innerHTML = '';
+    gameState.players.forEach(p=>{
+      if(p.id===1) return; // 跳过自己
+      const label = document.createElement('label');
+      label.style.display='block';
+      label.style.padding='8px';
+      label.style.borderBottom='1px solid #E2E8F0';
+      label.innerHTML = `<input type="radio" name="vote" value="${p.id}"> ${p.name}`;
+      voteOpts.appendChild(label);
+    });
+    document.getElementById('voteGroup').classList.remove('hidden');
+  } else {
+    // 非大聪明，等待大聪明投票
+    document.getElementById('waiting').classList.remove('hidden');
+    document.getElementById('waiting').querySelector('div').textContent = '等待大聪明投票...';
+  }
+}
+
+function castVote() {
+  const selected = document.querySelector('input[name="vote"]:checked');
+  if (!selected) return alert('请选择');
+  const target = parseInt(selected.value);
+  gameState.votes[1] = target;
+  document.getElementById('voteGroup').classList.add('hidden');
+  document.getElementById('waiting').classList.remove('hidden');
+  document.getElementById('waiting').querySelector('div').textContent = '等待结果...';
+
+  // 模拟投票完成，结算
+  setTimeout(showResult, 1500);
+}
+
+function showResult() {
+  const honestId = Object.keys(gameState.currentRoles).find(k=>gameState.currentRoles[k]==='老实人');
+  const bigSmartId = Object.keys(gameState.currentRoles).find(k=>gameState.currentRoles[k]==='大聪明');
+  const voterId = bigSmartId; // 简化：只有大聪明投票
+  const guess = gameState.votes[voterId];
+  const caught = guess == honestId;
+
+  let msg = `大聪明投票选择了 ${gameState.players.find(p=>p.id===guess).name}\n`;
+  msg += caught ? "✅ 猜中了！大聪明+2，老实人+2\n" : "❌ 猜错了！所有瞎掰王各+1\n";
+
+  // 本轮积分更新（简略）
+  gameState.players.forEach(p=>{
+    const role = gameState.currentRoles[p.id];
+    if (role === '大聪明' && caught) p.score += 2;
+    if (role === '老实人' && caught) p.score += 2;
+    if (role === '瞎掰王' && !caught) p.score += 1;
+  });
+
+  msg += "\n当前积分：\n";
+  gameState.players.sort((a,b)=>b.score-a.score).forEach(p=>{
+    msg += `${p.name}: ${p.score}分\n`;
+  });
+
+  document.getElementById('waiting').classList.add('hidden');
+  document.getElementById('resultPanel').classList.remove('hidden');
+  document.getElementById('resultText').textContent = msg;
+}
+
+function nextRound() {
+  if (gameState.currentRound < gameState.totalRounds) {
+    gameState.currentRound++;
+    initRound();
+  } else {
+    showFinal();
+  }
+}
+
+function showFinal() {
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('final').classList.remove('hidden');
+  const sorted = [...gameState.players].sort((a,b)=>b.score-a.score);
+  let msg = "🏆 最终排名\n\n";
+  sorted.forEach((p,i)=>msg += `${i+1}. ${p.name}（${p.score}分）\n`);
+  document.getElementById('finalResult').textContent = msg;
+}
+
+function reset() {
+  document.getElementById('final').classList.add('hidden');
+  document.getElementById('setup').classList.remove('hidden');
+  document.getElementById('answer').value = '';
+}
+
+function shuffle(arr){return arr.sort(()=>Math.random()-.5)}
+  </script>
+</body>
+</html>
