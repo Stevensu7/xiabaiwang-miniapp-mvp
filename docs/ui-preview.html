@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>瞎掰王 UI 预览</title>
+  <style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#F8FAFC;color:#1E293B;line-height:1.6;padding:32px}
+.container{max-width:430px;margin:0 auto}
+.card{background:#FFF;border-radius:24px;padding:40px;margin-bottom:32px;box-shadow:0 8px 24px rgba(99,102,241,0.08),0 2px 6px rgba(0,0,0,0.04)}
+.title{font-size:52px;font-weight:800;color:#6366F1;letter-spacing:-1px;margin-bottom:8px}
+.subtitle{font-size:28px;color:#64748B;margin-bottom:40px}
+.input-group{margin:24px 0}
+.label{display:block;font-size:28px;font-weight:600;color:#334155;margin-bottom:12px}
+.hint{display:block;font-size:24px;color:#94A3B8;margin-top:8px}
+input,textarea{width:100%;background:#F1F5F9;border:2px solid transparent;border-radius:12px;padding:24px;font-size:30px;color:#334155;transition:all .2s;box-sizing:border-box}
+input:focus,textarea:focus{background:#FFF;border-color:#6366F1;box-shadow:0 0 0 4px rgba(99,102,241,0.12);outline:none}
+textarea{min-height:160px}
+button[type="primary"]{width:100%;height:96px;border-radius:999px;background:linear-gradient(135deg,#6366F1 0%,#8B5CF6 100%);color:#FFF;font-size:32px;font-weight:600;border:none;box-shadow:0 8px 16px rgba(99,102,241,0.3);transition:all .2s;margin-top:32px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+button[type="primary"]:active{opacity:.92;transform:scale(.98);box-shadow:0 4px 8px rgba(99,102,241,0.2)}
+button{border-radius:12px;font-weight:500}
+.game-card .question{font-size:36px;font-weight:700;color:#6366F1;margin-bottom:24px}
+.current-player{font-size:28px;color:#64748B;margin-bottom:24px;padding:12px 16px;background:#F1F5F9;border-radius:8px}
+.score-title{font-size:34px;font-weight:700;color:#6366F1;margin-bottom:24px}
+.score-list{display:flex;flex-direction:column;gap:12px}
+.score-item{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;background:#F8FAFC;border-radius:12px}
+.score-value{font-size:32px;font-weight:700;color:#10B981}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 开始界面 -->
+    <div class="card" id="start-screen">
+      <div class="title">瞎掰王</div>
+      <div class="subtitle">谁是谎言大师？</div>
+
+      <div class="input-group">
+        <label class="label">玩家昵称</label>
+        <input placeholder="例如：张三,李四,王五" />
+        <span class="hint">多个玩家请用逗号分隔</span>
+      </div>
+
+      <button type="primary">开始游戏</button>
+    </div>
+
+    <!-- 游戏界面（隐藏，仅作展示） -->
+    <div class="card game-card" style="display:none">
+      <div class="question">题目：请解释什么是“量子纠缠”？</div>
+      <div class="current-player">轮到：玩家一</div>
+
+      <div class="input-group">
+        <label class="label">你的伪答案</label>
+        <textarea placeholder="编一个听起来很真的答案..."></textarea>
+      </div>
+
+      <button type="primary">提交</button>
+    </div>
+
+    <div class="card" style="display:none">
+      <div class="score-title">积分榜</div>
+      <div class="score-list">
+        <div class="score-item">
+          <span class="score-name">玩家一</span>
+          <span class="score-value">6 分</span>
+        </div>
+        <div class="score-item">
+          <span class="score-name">玩家二</span>
+          <span class="score-value">4 分</span>
+        </div>
+        <div class="score-item">
+          <span class="score-name">玩家三</span>
+          <span class="score-value">3 分</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

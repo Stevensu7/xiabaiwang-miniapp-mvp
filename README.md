@@ -2,6 +2,26 @@
 
 一个可快速开局的《瞎掰王》房间制原型，支持：创建房间、加入房间、身份分配、发言阶段、仅大聪明投票、自动计分。
 
+## 🎨 最新 UI 设计（2026-04-04）
+
+我们刚刚完成了一次 **全面的 UI 现代化重构**，采用新的设计系统：
+
+- **品牌色**：Indigo (#6366F1)
+- **卡片设计**：大圆角 + 悬浮阴影
+- **交互**：按压态、Focus 高亮
+- **暗色模式**：自动适配
+
+### 📱 界面预览
+
+**开始界面**  
+![UI Preview](https://raw.githubusercontent.com/Stevensu7/xiabaiwang-miniapp-mvp/master/docs/ui-preview.png)
+
+> 如果图片未加载，请查看 [直接预览 HTML](https://raw.githubusercontent.com/Stevensu7/xiabaiwang-miniapp-mvp/master/docs/ui-preview.html)
+
+完整设计说明见 [PR #1](https://github.com/Stevensu7/xiabaiwang-miniapp-mvp/pulls)。
+
+---
+
 ## 在线体验
 - GitHub Pages: https://stevensu7.github.io/xiabaiwang-miniapp-mvp/
 
@@ -40,8 +60,9 @@ python3 -m http.server 8080
 ```
 
 ## 版本说明
-- 当前版本重点验证“房间制+角色心智+计分闭环”
+- 当前版本重点验证"房间制+角色心智+计分闭环"
 - 暂未接入后端实时同步（多人同房跨设备实时状态）
+- **2026-04-04**：UI 现代化重构完成
 
 ## 下一步建议
 - 接入后端（WebSocket/云开发）实现真正实时房间同步
